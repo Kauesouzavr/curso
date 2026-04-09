@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>Mini Curso</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+<div class="container">
+    <h1>🚀 Mini Curso Exclusivo</h1>
+    <p>Aprenda passo a passo e tenha resultados rápidos!</p>
+
+    <div class="card">
+        <h2>O que você vai aprender:</h2>
+        <ul>
+            <li>✔ Método simples</li>
+            <li>✔ Estratégias práticas</li>
+            <li>✔ Resultados rápidos</li>
+        </ul>
+
+        <form action="/gerar_pix" method="POST">
+            <input type="text" name="nome" placeholder="Seu nome" required>
+
+            <label>
+                <input type="checkbox" id="extra" onclick="calcular()">
+                Bônus exclusivo (+ R$10)
+            </label>
+
+            <input type="hidden" name="valor" id="valor" value="29.90">
+
+            <h2 id="total">Total: R$ 29.90</h2>
+
+            <button type="submit">💳 Gerar PIX</button>
+        </form>
+    </div>
+</div>
+
+<script>
+function calcular(){
+    let extra = document.getElementById('extra').checked;
+    let total = extra ? 39.90 : 29.90;
+
+    document.getElementById('total').innerText = "Total: R$ " + total.toFixed(2);
+    document.getElementById('valor').value = total.toFixed(2);
+}
+</script>
+
+</body>
+</html>

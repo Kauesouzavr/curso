@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Pagamento PIX</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<div class="container">
+    <div class="card">
+        <h1>💳 Pagamento PIX</h1>
+
+        <img src="data:image/png;base64,{{ qr }}" width="250">
+
+        <p>Copie o código PIX:</p>
+
+        <textarea style="width:300px; height:100px;" readonly>{{ copia }}</textarea>
+
+        <br><br>
+        <a href="/">⬅ Voltar</a>
+    </div>
+</div>
+
+</body>
+</html>
