@@ -1,10 +1,9 @@
 from flask import Flask, render_template, request, redirect
 import sqlite3
 import qrcode
-import os
 import mercadopago
 
-sdk = mercadopago.SDK(os.getenv("MP_ACCESS_TOKEN"))
+sdk = mercadopago.SDK("TESTUSER6006511745695150584")
 app = Flask(__name__)
 
 # CRIAR BANCO
