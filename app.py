@@ -3,7 +3,7 @@ import sqlite3
 import qrcode
 import mercadopago
 
-sdk = mercadopago.SDK("APP_USR-1819523893047943-040920-74ef53175bd74c2893d444f42dee5037-1163447495")
+sdk = mercadopago.SDK("TESTUSER6006511745695150584")
 app = Flask(__name__)
 
 # CRIAR BANCO
