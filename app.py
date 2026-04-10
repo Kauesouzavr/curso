@@ -45,15 +45,16 @@ def gerar_pix():
     payment = sdk.payment().create(payment_data)
     response = payment["response"]
 
-    print(response)  # ajuda a ver erros no Render
+    print(response)
 
-    # verifica se veio QR code
+    # Se der erro na API, mostra na tela em vez de quebrar
     if "point_of_interaction" not in response:
-        return f"Erro ao gerar PIX: {response}"
+        return f"Erro ao gerar PIX:<br><pre>{response}</pre>"
 
     qr_code = response["point_of_interaction"]["transaction_data"]["qr_code_base64"]
     qr_code_text = response["point_of_interaction"]["transaction_data"]["qr_code"]
 
+    # Salvar pedido no banco
     conn = sqlite3.connect('database.db')
     c = conn.cursor()
     c.execute(
@@ -65,21 +66,12 @@ def gerar_pix():
 
     return render_template("pix.html", qr=qr_code, copia=qr_code_text)
 
-    # salvar pedido no banco
-    conn = sqlite3.connect('database.db')
-    c = conn.cursor()
-    c.execute("INSERT INTO pedidos (nome, valor, status) VALUES (?, ?, ?)",
-              (nome, valor, "pendente"))
-    conn.commit()
-    conn.close()
-
-    return render_template('pix.html', qr=qr_code, copia=qr_code_text)
-# PAGAMENTO
+# ---------------- PAGAMENTO ----------------
 @app.route('/pix')
 def pix():
     return render_template('pix.html')
 
-# PAINEL
+# ---------------- PAINEL ADMIN ----------------
 @app.route('/admin')
 def admin():
     conn = sqlite3.connect('database.db')
@@ -90,7 +82,7 @@ def admin():
 
     return render_template('admin.html', pedidos=pedidos)
 
-# CONFIRMAR
+# ---------------- CONFIRMAR PAGAMENTO ----------------
 @app.route('/confirmar/<int:id>')
 def confirmar(id):
     conn = sqlite3.connect('database.db')
@@ -101,5 +93,6 @@ def confirmar(id):
 
     return redirect('/admin')
 
+# ---------------- RODAR APP ----------------
 if __name__ == '__main__':
     app.run(debug=True)
