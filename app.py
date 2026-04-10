@@ -37,7 +37,7 @@ def gerar_pix():
         "description": "Compra do curso",
         "payment_method_id": "pix",
         "payer": {
-            "email": "teste@email.com",
+            "email": "kauesouzavr@gmail.com",
             "first_name": nome
         }
     }
@@ -45,8 +45,25 @@ def gerar_pix():
     payment = sdk.payment().create(payment_data)
     response = payment["response"]
 
+    print(response)  # ajuda a ver erros no Render
+
+    # verifica se veio QR code
+    if "point_of_interaction" not in response:
+        return f"Erro ao gerar PIX: {response}"
+
     qr_code = response["point_of_interaction"]["transaction_data"]["qr_code_base64"]
     qr_code_text = response["point_of_interaction"]["transaction_data"]["qr_code"]
+
+    conn = sqlite3.connect('database.db')
+    c = conn.cursor()
+    c.execute(
+        "INSERT INTO pedidos (nome, valor, status) VALUES (?, ?, ?)",
+        (nome, valor, "pendente")
+    )
+    conn.commit()
+    conn.close()
+
+    return render_template("pix.html", qr=qr_code, copia=qr_code_text)
 
     # salvar pedido no banco
     conn = sqlite3.connect('database.db')
