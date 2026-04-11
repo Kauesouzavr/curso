@@ -72,5 +72,8 @@ def confirmar(id):
     return redirect('/admin')
 
 # RODAR APP
+@app.route('/meu-acesso')
+def meu_acesso():
+    return render_template('curso.html')
 if __name__ == '__main__':
     app.run(debug=True)

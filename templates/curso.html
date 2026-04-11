@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Meu Curso</title>
+</head>
+<body>
+    <h1>Área do Curso</h1>
+    <p>Bem-vindo! Aqui vai o conteúdo do minicurso.</p>
+
+    <video width="600" controls>
+        <source src="{{ url_for('static', filename='curso.mp4') }}" type="video/mp4">
+        Seu navegador não suporta vídeo.
+    </video>
+</body>
+</html>
