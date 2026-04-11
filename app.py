@@ -1,7 +1,32 @@
 from flask import Flask, render_template, request, redirect
 import sqlite3
+from flask import session
 
 app = Flask(__name__)
+
+#Senha pra acesso
+app.secret_key = "123"  # pode mudar depois
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        senha = request.form['senha']
+
+        if senha == "123":  # SUA SENHA
+            session['logado'] = True
+            return redirect('/curso')
+        else:
+            return "Senha incorreta"
+
+    return render_template('login.html')
+
+
+@app.route('/curso')
+def curso():
+    if not session.get('logado'):
+        return redirect('/login')
+
+    return render_template('curso.html')
 
 # CRIAR BANCO
 def init_db():

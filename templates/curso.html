@@ -1,16 +1,46 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <title>Meu Curso</title>
-</head>
-<body>
-    <h1>Área do Curso</h1>
-    <p>Bem-vindo! Aqui vai o conteúdo do minicurso.</p>
+<meta charset="UTF-8">
+<title>Curso</title>
 
-    <video width="600" controls>
+<style>
+body {
+    background: #0f0f0f;
+    color: white;
+    font-family: Arial;
+    text-align: center;
+}
+
+h1 {
+    margin-top: 20px;
+}
+
+.video {
+    margin-top: 30px;
+}
+
+video {
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(255,0,0,0.5);
+}
+</style>
+
+</head>
+
+<body>
+
+<h1>🎬 Área do Curso</h1>
+
+<div class="video">
+    <video width="800" controls controlsList="nodownload">
         <source src="{{ url_for('static', filename='curso.mp4') }}" type="video/mp4">
-        Seu navegador não suporta vídeo.
     </video>
+</div>
+
+<script>
+document.addEventListener('contextmenu', event => event.preventDefault());
+</script>
+
 </body>
 </html>
