@@ -1,21 +1,20 @@
 from flask import Flask, render_template, request, redirect
 import sqlite3
-import qrcode
-import mercadopago
 
-sdk = mercadopago.SDK("APP_USR-8625223623593145-040920-229de533f2cf09c9f8dcf84f97a73b6c-3327435010")
 app = Flask(__name__)
 
 # CRIAR BANCO
 def init_db():
     conn = sqlite3.connect('database.db')
     c = conn.cursor()
-    c.execute('''CREATE TABLE IF NOT EXISTS pedidos (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        nome TEXT,
-        valor REAL,
-        status TEXT
-    )''')
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS pedidos (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            nome TEXT,
+            valor REAL,
+            status TEXT
+        )
+    ''')
     conn.commit()
     conn.close()
 
@@ -26,35 +25,13 @@ init_db()
 def home():
     return render_template('index.html')
 
-# GERAR PIX
+# BOTÃO COMPRAR -> LINK DO MERCADO PAGO
 @app.route('/gerar_pix', methods=['POST'])
 def gerar_pix():
     nome = request.form['nome']
     valor = float(request.form['valor'])
 
-    payment_data = {
-        "transaction_amount": valor,
-        "description": "Compra do curso",
-        "payment_method_id": "pix",
-        "payer": {
-            "email": "kauesouzavr@gmail.com",
-            "first_name": nome
-        }
-    }
-
-    payment = sdk.payment().create(payment_data)
-    response = payment["response"]
-
-    print(response)
-
-    # Se der erro na API, mostra na tela em vez de quebrar
-    if "point_of_interaction" not in response:
-        return f"Erro ao gerar PIX:<br><pre>{response}</pre>"
-
-    qr_code = response["point_of_interaction"]["transaction_data"]["qr_code_base64"]
-    qr_code_text = response["point_of_interaction"]["transaction_data"]["qr_code"]
-
-    # Salvar pedido no banco
+    # salvar pedido como pendente
     conn = sqlite3.connect('database.db')
     c = conn.cursor()
     c.execute(
@@ -64,14 +41,15 @@ def gerar_pix():
     conn.commit()
     conn.close()
 
-    return render_template("pix.html", qr=qr_code, copia=qr_code_text)
+    # TROQUE PELO SEU LINK DE PAGAMENTO
+    return redirect("https://mpago.la/2hUZRu8")
 
-# ---------------- PAGAMENTO ----------------
+# PÁGINA PIX (se quiser manter)
 @app.route('/pix')
 def pix():
     return render_template('pix.html')
 
-# ---------------- PAINEL ADMIN ----------------
+# PAINEL ADMIN
 @app.route('/admin')
 def admin():
     conn = sqlite3.connect('database.db')
@@ -82,7 +60,7 @@ def admin():
 
     return render_template('admin.html', pedidos=pedidos)
 
-# ---------------- CONFIRMAR PAGAMENTO ----------------
+# CONFIRMAR PAGAMENTO
 @app.route('/confirmar/<int:id>')
 def confirmar(id):
     conn = sqlite3.connect('database.db')
@@ -93,6 +71,6 @@ def confirmar(id):
 
     return redirect('/admin')
 
-# ---------------- RODAR APP ----------------
+# RODAR APP
 if __name__ == '__main__':
     app.run(debug=True)
