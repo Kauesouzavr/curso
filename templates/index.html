@@ -21,7 +21,11 @@
         </ul>
 
         <form action="/gerar_pix" method="POST">
+            
             <input type="text" name="nome" placeholder="Seu nome" required>
+
+            <!-- NOVO CAMPO EMAIL -->
+            <input type="email" name="email" placeholder="Seu email (para liberar acesso)" required>
 
             <label>
                 <input type="checkbox" id="extra" onclick="calcular()">
@@ -32,8 +36,18 @@
 
             <h2 id="total">Total: R$ 29.90</h2>
 
-            <button type="submit">💳 Gerar PIX</button>
+            <button type="submit">💳 Comprar agora</button>
         </form>
+
+        <!-- ÁREA PARA ACESSAR CURSO -->
+        <hr>
+        <h3>Já comprou?</h3>
+
+        <form action="/curso" method="POST">
+            <input type="email" name="email" placeholder="Digite seu email" required>
+            <button type="submit">🔓 Acessar curso</button>
+        </form>
+
     </div>
 </div>
 
