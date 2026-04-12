@@ -1,7 +1,11 @@
 from flask import Flask, render_template, request, redirect
 import sqlite3
+import mercadopago
 
 app = Flask(__name__)
+
+# 🔑 SEU TOKEN AQUI
+sdk = mercadopago.SDK("SEU_ACCESS_TOKEN")
 
 # ---------------- BANCO ----------------
 def init_db():
@@ -10,10 +14,9 @@ def init_db():
     c.execute('''
         CREATE TABLE IF NOT EXISTS pedidos (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            nome TEXT,
             email TEXT,
-            valor REAL,
-            status TEXT
+            status TEXT,
+            payment_id TEXT
         )
     ''')
     conn.commit()
@@ -26,28 +29,68 @@ init_db()
 def home():
     return render_template('index.html')
 
-# ---------------- GERAR PAGAMENTO ----------------
-@app.route('/gerar_pix', methods=['POST'])
-def gerar_pix():
-    nome = request.form['nome']
+# ---------------- CRIAR PAGAMENTO ----------------
+@app.route('/comprar', methods=['POST'])
+def comprar():
     email = request.form['email']
-    valor = float(request.form['valor'])
 
-    conn = sqlite3.connect('database.db')
-    c = conn.cursor()
+    preference_data = {
+        "items": [
+            {
+                "title": "Mini Curso",
+                "quantity": 1,
+                "currency_id": "BRL",
+                "unit_price": 29.90
+            }
+        ],
+        "payer": {
+            "email": email
+        },
+        "back_urls": {
+            "success": "https://SEU-SITE.onrender.com/sucesso"
+        },
+        "auto_return": "approved",
+        "notification_url": "https://SEU-SITE.onrender.com/webhook"
+    }
 
-    c.execute(
-        "INSERT INTO pedidos (nome, email, valor, status) VALUES (?, ?, ?, ?)",
-        (nome, email, valor, "pendente")
-    )
+    preference = sdk.preference().create(preference_data)
+    link = preference["response"]["init_point"]
 
-    conn.commit()
-    conn.close()
+    return redirect(link)
 
-    # link do pagamento
-    return redirect("https://mpago.la/2hUZRu8")
+# ---------------- WEBHOOK ----------------
+@app.route('/webhook', methods=['POST'])
+def webhook():
+    data = request.json
 
-# ---------------- ACESSAR CURSO ----------------
+    if "data" in data:
+        payment_id = data["data"]["id"]
+
+        payment = sdk.payment().get(payment_id)
+        response = payment["response"]
+
+        if response["status"] == "approved":
+            email = response["payer"]["email"]
+
+            conn = sqlite3.connect('database.db')
+            c = conn.cursor()
+
+            c.execute(
+                "INSERT INTO pedidos (email, status, payment_id) VALUES (?, ?, ?)",
+                (email, "pago", str(payment_id))
+            )
+
+            conn.commit()
+            conn.close()
+
+    return "ok", 200
+
+# ---------------- SUCESSO ----------------
+@app.route('/sucesso')
+def sucesso():
+    return render_template('sucesso.html')
+
+# ---------------- CURSO ----------------
 @app.route('/curso', methods=['POST'])
 def curso():
     email = request.form['email']
@@ -55,42 +98,15 @@ def curso():
     conn = sqlite3.connect('database.db')
     c = conn.cursor()
 
-    c.execute("SELECT status FROM pedidos WHERE email=?", (email,))
-    pedido = c.fetchone()
+    c.execute("SELECT * FROM pedidos WHERE email=? AND status='pago'", (email,))
+    result = c.fetchone()
 
     conn.close()
 
-    if pedido and pedido[0] == "pago":
+    if result:
         return render_template('curso.html')
     else:
-        return "❌ Pagamento não encontrado ou ainda não aprovado."
-
-# ---------------- PAINEL ADMIN ----------------
-@app.route('/admin')
-def admin():
-    conn = sqlite3.connect('database.db')
-    c = conn.cursor()
-    c.execute("SELECT * FROM pedidos")
-    pedidos = c.fetchall()
-    conn.close()
-
-    return render_template('admin.html', pedidos=pedidos)
-
-# ---------------- CONFIRMAR MANUAL ----------------
-@app.route('/confirmar/<int:id>')
-def confirmar(id):
-    conn = sqlite3.connect('database.db')
-    c = conn.cursor()
-    c.execute("UPDATE pedidos SET status='pago' WHERE id=?", (id,))
-    conn.commit()
-    conn.close()
-
-    return redirect('/admin')
-
-# ---------------- ACESSO DIRETO (SEU TESTE) ----------------
-@app.route('/meu-acesso')
-def meu_acesso():
-    return render_template('curso.html')
+        return "Pagamento não encontrado"
 
 # ---------------- RODAR ----------------
 if __name__ == '__main__':
