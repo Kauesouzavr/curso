@@ -5,7 +5,7 @@ import mercadopago
 app = Flask(__name__)
 
 # 🔑 COLOQUE SEU TOKEN AQUI
-sdk = mercadopago.SDK("SEU_ACCESS_TOKEN")
+sdk = mercadopago.SDK("APP_USR-8625223623593145-040920-229de533f2cf09c9f8dcf84f97a73b6c-3327435010")
 
 # ---------------- BANCO ----------------
 def init_db():
