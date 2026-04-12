@@ -58,10 +58,12 @@ def comprar():
 
     return redirect(link)
 
-# ---------------- WEBHOOK ----------------
+# ---------------- WEBHOOK REAL ----------------
 @app.route('/webhook', methods=['POST'])
 def webhook():
     data = request.json
+
+    print("WEBHOOK REAL:", data)
 
     if "data" in data:
         payment_id = data["data"]["id"]
@@ -85,6 +87,26 @@ def webhook():
 
     return "ok", 200
 
+
+# ---------------- TESTE SEM PAGAR ----------------
+@app.route('/teste')
+def teste():
+    email = request.args.get('email')
+
+    conn = sqlite3.connect('database.db')
+    c = conn.cursor()
+
+    c.execute(
+        "INSERT INTO pedidos (email, status, payment_id) VALUES (?, ?, ?)",
+        (email, "pago", "TESTE123")
+    )
+
+    conn.commit()
+    conn.close()
+
+    return f"Pagamento SIMULADO para {email} com sucesso!"
+
+
 # ---------------- SUCESSO ----------------
 @app.route('/sucesso')
 def sucesso():
@@ -106,7 +128,7 @@ def curso():
     if result:
         return render_template('curso.html')
     else:
-        return "Pagamento não encontrado"
+        return "❌ Pagamento não encontrado"
 
 # ---------------- RODAR ----------------
 if __name__ == '__main__':
