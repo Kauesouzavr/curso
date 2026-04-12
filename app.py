@@ -4,8 +4,8 @@ import mercadopago
 
 app = Flask(__name__)
 
-# 🔑 SEU TOKEN AQUI
-sdk = mercadopago.SDK("SEU_ACCESS_TOKEN")
+# 🔑 COLOQUE SEU TOKEN AQUI (TEST OU PRODUÇÃO)
+sdk = mercadopago.SDK("APP_USR-8625223623593145-040920-229de533f2cf09c9f8dcf84f97a73b6c-3327435010")
 
 # ---------------- BANCO ----------------
 def init_db():
@@ -47,23 +47,29 @@ def comprar():
             "email": email
         },
         "back_urls": {
-            "success": "https://SEU-SITE.onrender.com/sucesso"
+            "success": "https://curso-yvqf.onrender.com/sucesso"
         },
         "auto_return": "approved",
-        "notification_url": "https://SEU-SITE.onrender.com/webhook"
+        "notification_url": "https://curso-yvqf.onrender.com/webhook"
     }
 
     preference = sdk.preference().create(preference_data)
+
+    print("RESPOSTA MP:", preference)
+
+    if "response" not in preference or "init_point" not in preference["response"]:
+        return f"Erro ao criar pagamento:<br><pre>{preference}</pre>"
+
     link = preference["response"]["init_point"]
 
     return redirect(link)
 
-# ---------------- WEBHOOK REAL ----------------
+# ---------------- WEBHOOK ----------------
 @app.route('/webhook', methods=['POST'])
 def webhook():
     data = request.json
 
-    print("WEBHOOK REAL:", data)
+    print("WEBHOOK:", data)
 
     if "data" in data:
         payment_id = data["data"]["id"]
@@ -87,7 +93,6 @@ def webhook():
 
     return "ok", 200
 
-
 # ---------------- TESTE SEM PAGAR ----------------
 @app.route('/teste')
 def teste():
@@ -104,8 +109,7 @@ def teste():
     conn.commit()
     conn.close()
 
-    return f"Pagamento SIMULADO para {email} com sucesso!"
-
+    return f"Pagamento SIMULADO para {email}"
 
 # ---------------- SUCESSO ----------------
 @app.route('/sucesso')

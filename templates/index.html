@@ -20,45 +20,23 @@
             <li>✔ Resultados rápidos</li>
         </ul>
 
-        <form action="/gerar_pix" method="POST">
-            
-            <input type="text" name="nome" placeholder="Seu nome" required>
-
-            <!-- NOVO CAMPO EMAIL -->
-            <input type="email" name="email" placeholder="Seu email (para liberar acesso)" required>
-
-            <label>
-                <input type="checkbox" id="extra" onclick="calcular()">
-                Bônus exclusivo (+ R$10)
-            </label>
-
-            <input type="hidden" name="valor" id="valor" value="29.90">
-
-            <h2 id="total">Total: R$ 29.90</h2>
-
-            <button type="submit">💳 Comprar agora</button>
-        </form>
-
-        <!-- ÁREA PARA ACESSAR CURSO -->
-        <hr>
-        <h3>Já comprou?</h3>
-
+        <!-- COMPRA -->
         <form action="/comprar" method="POST">
             <input type="email" name="email" placeholder="Seu email" required>
             <button type="submit">💳 Comprar agora</button>
         </form>
+
+        <hr>
+
+        <!-- ACESSO -->
+        <h3>Já comprou?</h3>
+        <form action="/curso" method="POST">
+            <input type="email" name="email" placeholder="Digite seu email" required>
+            <button type="submit">🔓 Acessar curso</button>
+        </form>
+
     </div>
 </div>
-
-<script>
-function calcular(){
-    let extra = document.getElementById('extra').checked;
-    let total = extra ? 39.90 : 29.90;
-
-    document.getElementById('total').innerText = "Total: R$ " + total.toFixed(2);
-    document.getElementById('valor').value = total.toFixed(2);
-}
-</script>
 
 </body>
 </html>
